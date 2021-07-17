@@ -76,7 +76,8 @@ def eval(context, question):
                   drop_prob=config.drop_prob)
     try:
         if config.cuda:
-            model.load_state_dict(torch.load(os.path.join(config.squad_models, "model_final.pkl"))["state_dict"])
+            #model.load_state_dict(torch.load(os.path.join(config.squad_models, "model_final.pkl"))["state_dict"])
+            model.load_state_dict(torch.load(os.path.join(config.squad_models, "model.pkl"))["state_dict"])
         else:
             model.load_state_dict(torch.load(os.path.join(config.squad_models, "model_final.pkl"),
                                              map_location=lambda storage, loc: storage)["state_dict"])
@@ -120,3 +121,4 @@ if __name__ == "__main__":
         print("Q:", q)
         answer = eval(context, q)
         print("A:", answer, "\n")
+
