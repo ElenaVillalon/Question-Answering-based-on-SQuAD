@@ -156,8 +156,8 @@ class SquadPreprocessor:
 
             with open(os.path.join(self.data_dir, "train", "word2idx.pkl"), "rb") as wi,\
                  open(os.path.join(self.data_dir, "train", "char2idx.pkl"), "rb") as ci:
-                    word2idx = pickle.load(wi, allow_pickle=True)
-                    char2idx = pickle.load(ci, allow_pickle=True)
+                    word2idx = pickle.load(wi)
+                    char2idx = pickle.load(ci)
 
         print("Number of questions before filtering:", len(question))
         filter = [len(c) < max_len_context and max([len(w) for w in c]) < max_len_word and
