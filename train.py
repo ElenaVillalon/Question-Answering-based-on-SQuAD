@@ -98,12 +98,12 @@ for i in [t_w_context, t_c_context, t_w_question, t_c_question, t_labels]:
 train_dataloader = DataLoader(train_dataset,
                               shuffle=True,
                               batch_size=hyper_params["batch_size"],
-                              num_workers=4)
+                              num_workers=1)
 
 valid_dataloader = DataLoader(valid_dataset,
                               shuffle=True,
                               batch_size=hyper_params["batch_size"],
-                              num_workers=4)
+                              num_workers=1)
 
 print("Length of training data loader is:", len(train_dataloader))
 print("Length of valid data loader is:", len(valid_dataloader))
