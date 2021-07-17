@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
+from tqdm.auto import tqdm
 
 # internal utilities
 import config
@@ -44,7 +45,7 @@ device = torch.device("cuda" if hyper_params["cuda"] else "cpu")
 torch.manual_seed(42)
 
 # define a path to save experiment logs
-experiment_path = "output/{}".format(config.exp)
+experiment_path = "/content/drive/MyDrive/ProyectoDeepLearningUC/output/{}".format(config.exp)
 if not os.path.exists(experiment_path):
     os.mkdir(experiment_path)
 
@@ -90,6 +91,9 @@ char_embedding_matrix = torch.from_numpy(np.array(char_embedding_matrix)).type(t
 train_dataset = SquadDataset(t_w_context, t_c_context, t_w_question, t_c_question, t_labels)
 valid_dataset = SquadDataset(d_w_context, d_c_context, d_w_question, d_c_question, d_labels)
 
+for i in [t_w_context, t_c_context, t_w_question, t_c_question, t_labels]:
+  print(len(i))
+
 # load data generators
 train_dataloader = DataLoader(train_dataset,
                               shuffle=True,
@@ -125,6 +129,16 @@ if hyper_params["pretrained"]:
 else:
     best_valid_loss = 100
     epoch_checkpoint = 0
+  
+def fix_iter(t):
+  while True:
+    try: 
+      try:
+        yield next(t)    
+      except RuntimeError:
+        continue  
+    except StopIteration:
+      return
 
 # train the Model
 print("Starting training...")
@@ -132,13 +146,26 @@ for epoch in range(hyper_params["num_epochs"]):
     print("##### epoch {:2d}".format(epoch + 1))
     model.train()
     train_losses = 0
-    for i, batch in enumerate(train_dataloader):
-        w_context, c_context, w_question, c_question, label1, label2 = batch[0].long().to(device),\
-                                                                       batch[1].long().to(device), \
-                                                                       batch[2].long().to(device), \
-                                                                       batch[3].long().to(device), \
-                                                                       batch[4][:, 0].long().to(device),\
-                                                                       batch[4][:, 1].long().to(device)
+    
+    progress = iter(tqdm(enumerate(train_dataloader), total=len(train_dataloader)))
+
+    #for i, batch in range(tqdm(enumerate(train_dataloader), total=len(train_dataloader)):
+    for i, batch in fix_iter(progress):
+
+        try:
+          w_context, c_context, w_question, c_question, label1, label2 = batch[0].long().to(device),\
+                                                                        batch[1].long().to(device), \
+                                                                        batch[2].long().to(device), \
+                                                                        batch[3].long().to(device), \
+                                                                        batch[4][:, 0].long().to(device),\
+                                                                        batch[4][:, 1].long().to(device)
+        except Exception as err:
+          print('Error on iter:', i)
+          print(err)
+          print('batch[4]:', batch[4])
+          print('len(batch):', len(batch))
+          continue
+          
         optimizer.zero_grad()
         pred1, pred2 = model(w_context, c_context, w_question, c_question)
         loss = criterion(pred1, label1) + criterion(pred2, label2)
