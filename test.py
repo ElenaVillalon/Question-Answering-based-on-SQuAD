@@ -81,7 +81,7 @@ test_dataset = SquadDataset(d_w_context, d_c_context, d_w_question, d_c_question
 test_dataloader = DataLoader(test_dataset,
                              shuffle=True,
                              batch_size=hyper_params["batch_size"],
-                             num_workers=4)
+                             num_workers=1)
 
 print("Length of test data loader is:", len(test_dataloader))
 
@@ -92,9 +92,9 @@ model = BiDAF(word_vectors=word_embedding_matrix,
               drop_prob=hyper_params["drop_prob"])
 try:
     if config.cuda:
-        model.load_state_dict(torch.load(os.path.join(config.squad_models, "model_final.pkl"))["state_dict"])
+        model.load_state_dict(torch.load(os.path.join(config.squad_models, "model.pkl"))["state_dict"])
     else:
-        model.load_state_dict(torch.load(os.path.join(config.squad_models, "model_final.pkl"),
+        model.load_state_dict(torch.load(os.path.join(config.squad_models, "model.pkl"),
                                          map_location=lambda storage, loc: storage)["state_dict"])
     print("Model weights successfully loaded.")
 except:
